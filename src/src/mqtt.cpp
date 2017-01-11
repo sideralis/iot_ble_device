@@ -39,7 +39,7 @@
  */
 char MQTT_SERVER[] = "tcp://iot.eclipse.org:1883";
 char MQTT_CLIENTID[] = "edison:edison_biot_up";
-char MQTT_TOPIC[] = "campusid/edison/json";
+char MQTT_TOPIC[] = "campusid/edison/rssi";
 
 MQTTClient client;
 MQTTClient_deliveryToken token;
