@@ -32,10 +32,13 @@ MQTTClient client;
 MQTTClient_deliveryToken token;
 
 void connect_mqtt() {
+	/* TP: Cette fonction doit permettre de se connecter a un broker MQTT */
 }
 
 void disconnect_mqtt() {
+	/* TP: Cette fonction doit permettre de se deconnecter d'un broker MQTT */
 }
 
 void log_mqtt(char *payload) {
+	/* TP: Cette fonction doit permettre d'envoyer un message MQTT */
 }

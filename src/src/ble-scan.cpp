@@ -69,6 +69,7 @@ void log(char *from, char *to, uint8_t *rssi) {
 	strftime(mbstr, sizeof(mbstr), "%FT%TZ", localtime(&now));
 
 	char text[200];
+	/* TP: Formatez la variable text au format JSON */
 
 	log_mqtt(text);
 }
@@ -79,12 +80,80 @@ struct BLE {
 	char macaddr[18];
 
 	void open() {
+		/* TP: Recuperation de l'adresse MAC de notre device Bluetooth */
+
+
+		/* TP: Activer le mode advertising de notre device Bluetooth */
+
+
+		socklen_t originalFilterLen = sizeof(originalFilter);
+		getsockopt(hciSocket, SOL_HCI, HCI_FILTER, &originalFilter, &originalFilterLen); // save original filter
+		hci_filter_clear(&newFilter);
+		hci_filter_set_ptype(HCI_EVENT_PKT, &newFilter);
+		hci_filter_set_event(EVT_LE_META_EVENT, &newFilter);
+		setsockopt(hciSocket, SOL_HCI, HCI_FILTER, &newFilter, sizeof(newFilter)); // setup new filter
+		/* TP: Activer le scanning de notre device Bluetooth */
+
+
 	}
 
 	void close() {
+		// put back original filter
+		setsockopt(hciSocket, SOL_HCI, HCI_FILTER, &originalFilter, sizeof(originalFilter));
+
+		// stop scanning
+		hci_le_set_scan_enable(hciSocket, 0x00, 0, 1000);
+
+		// close BLE adaptor
+		hci_close_dev(hciSocket);
 	}
 
-	void get_device() {
+	int get_device() {
+
+		unsigned char buf[HCI_MAX_EVENT_SIZE], *ptr;
+		int len;
+
+		evt_le_meta_event *meta;
+
+		fd_set rfds;
+		struct timeval tv;
+		int selectRetval;
+
+		FD_ZERO(&rfds);
+		FD_SET(hciSocket, &rfds);
+
+		tv.tv_sec = 2;
+		tv.tv_usec = 0;
+
+		// wait to see if we have data on the socket
+		selectRetval = select(hciSocket + 1, &rfds, NULL, NULL, &tv);
+
+		if (-1 == selectRetval) {
+			return -1;
+		}
+
+		len = read(hciSocket, buf, sizeof(buf));
+		if (len == 0) {
+			return -1;
+		}
+
+		ptr = buf + (1 + HCI_EVENT_HDR_SIZE);
+		len -= (1 + HCI_EVENT_HDR_SIZE);
+
+		meta = (evt_le_meta_event *) ptr;
+
+		if (meta->subevent != 0x02)
+			return -1;
+
+		/* TP: Recuperez les infos adresse mac et valeur rssi du device detecte a partir du contenu pointe par meta->data */
+		//int num_reports = meta->data[0];
+
+
+		/* TP: Appelez log() avec les bons parametres */
+
+
+
+		return 0;
 	}
 };
 
