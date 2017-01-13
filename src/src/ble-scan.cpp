@@ -52,6 +52,7 @@
 #include <chrono>
 #include <signal.h>
 #include <types.h>
+#include <curses.h>
 
 using namespace std;
 
@@ -62,16 +63,23 @@ using namespace std;
 #include <bluetooth/hci_lib.h>
 
 // Log the event to the remote datastore
-void log(char *from, char *to, uint8_t *rssi) {
-
+void log(char *from, char *to, int rssi) {
+	int i;
 	time_t now = time(NULL);
 	char mbstr[sizeof "2011-10-08T07:07:09Z"];
 	strftime(mbstr, sizeof(mbstr), "%FT%TZ", localtime(&now));
 
 	char text[200];
-	sprintf(text, "{\"from\": \"%s\", \"to\": \"%s\", \"rssi\": %i, \"date\": \"%s\"}", from, to, *rssi, mbstr);
+	sprintf(text, "{\"from\": \"%s\", \"to\": \"%s\", \"rssi\": %i, \"date\": \"%s\"}", from, to, rssi, mbstr);
 
-	//printf("%s\n", text);
+//	printf("%s\n", text);
+
+	printf("%s -> %s ",from, to);
+	for (i=0; i < rssi/2; i++)
+		printf("#");
+	for (i=rssi/2; i< 80 - 12 -12 -4 - 10; i++)
+		printf(" ");
+	printf("\n");
 	log_mqtt(text);
 }
 
@@ -200,7 +208,7 @@ struct BLE {
 		hci_le_set_scan_enable(hciSocket, 0x00, 0, 1000);
 
 		// set scan params
-		hci_le_set_scan_parameters(hciSocket, 0x01, htobs(0x0010), htobs(0x0010), 0x00, 0, 1000);
+		hci_le_set_scan_parameters(hciSocket, 0x01, htobs(0x0800), htobs(0x0800), 0x00, 0, 1000);
 
 		// start scanning
 		hci_le_set_scan_enable(hciSocket, 0x00, 0, 1000);
@@ -288,7 +296,8 @@ struct BLE {
 			rssi = data;
 			//printf("\n RSSI = %i\n", *data);
 			data++;
-			log(macaddr, addr, rssi);
+			if (addr[0] == '5' && addr[1] == '8')
+				log(macaddr, addr, (int)(256-*rssi));
 
 		}
 		return addr;

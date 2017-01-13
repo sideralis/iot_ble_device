@@ -38,7 +38,7 @@
  char MQTT_TOPIC[]="iot-2/evt/status/fmt/json";
  */
 char MQTT_SERVER[] = "tcp://iot.eclipse.org:1883";
-char MQTT_CLIENTID[] = "edison:edison_biot_up";
+char MQTT_CLIENTID[] = "edison:edison_intel_up";
 char MQTT_TOPIC[] = "campusid/edison/rssi";
 
 MQTTClient client;
@@ -91,10 +91,10 @@ void log_mqtt(char *payload) {
 
 	rc = MQTTClient_publishMessage(client, MQTT_TOPIC, &pubmsg, &token);
 	if (rc != MQTTCLIENT_SUCCESS)
-		std::cout << "Error publishing!" << std::endl;
-	std::cout << payload << std::endl;
+		std::cout << "Error publishing! " << rc << std::endl;
+	//std::cout << payload << std::endl;
 
 	rc = MQTTClient_waitForCompletion(client, token, TIMEOUT);
 	if (rc != MQTTCLIENT_SUCCESS)
-		std::cout << "Error wait for completion!" << std::endl;
+		std::cout << "Error wait for completion! " << rc << std::endl;
 }

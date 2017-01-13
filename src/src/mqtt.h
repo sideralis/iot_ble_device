@@ -33,7 +33,7 @@ extern "C" {
 #include "MQTTClientPersistence.h"
 }
 
-#define QOS         1
+#define QOS         0
 #define TIMEOUT     10000L
 
 void log_mqtt(char *payload);
